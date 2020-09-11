@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from model_metrics import model_metrics
 from model_validation_plot import plot_series, plot_acf_pacf, plot_actual_pred
 
+pd.set_option("display.max_rows", None, "display.max_columns", None)
 
 df = pd.DataFrame(columns=["date", "actual", "pred"])
 
