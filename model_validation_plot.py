@@ -24,7 +24,9 @@ def plot_series(x):
     plt.subplot(211)
     x.hist()
     plt.subplot(212)
-    x.plot(kind='kde')
+    x.plot(kind='kde', title='distribution')
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.88)
     plt.show()
     return fig
 
@@ -37,6 +39,9 @@ def plot_acf_pacf(x):
     plt.subplot(212)
     plt.title('PACF')
     plot_pacf(x, ax=plt.gca(), lags = 30)
+    
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.88)
     plt.show()
     return fig
 
