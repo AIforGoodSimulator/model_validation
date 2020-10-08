@@ -4,14 +4,22 @@
    
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, median_absolute_error, mean_squared_log_error
 
-# current stable version of sklearn does not MAPE
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, median_absolute_error, mean_squared_log_error
+#MAPE is only available in latest Dev versio of sklearn
 #from sklearn.metrics import mean_absolute_percentage_error
 
-
 def mean_absolute_percentage_error(y_true, y_pred): 
+
+    #Remove Null and Zeros 
+    y_true= y_true.dropna() 
+    y_pred = y_pred.dropna()
+    rows = y_true!=0
+    y_true = y_true[rows]
+    y_pred = y_pred[rows]
+        
     y_true, y_pred = np.array(y_true), np.array(y_pred)
+ 
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
