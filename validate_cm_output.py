@@ -29,6 +29,10 @@ n_rows = df.shape[0]
 # num of simuls
 n_simul=df[df==0].count()
 
+print("Processing CM output for model validation:" + model_output)
+print("num of days = ", n_days)
+print("num of simulations= ", n_simul)
+
 # Get df for population
 # Use this as the benchmark for the age group
 cols_overall = ["Time"] + case_cols
@@ -61,7 +65,7 @@ for age in age_categories:
         y=df_all[col]
         pred=df_age[col_age]
         
-        #filter out nan or zero values of y_true;
+        #filter out nan or zero values of y;
         """
         # this is done inside model_metrics now
         y= y.dropna() 
@@ -73,8 +77,10 @@ for age in age_categories:
         results=model_metrics(y,pred)
         results['age']= age
         results['case'] = col
-        print("Model Metrics for Age Group = {0}, Case={1}: ".format(age, col))
-        print(results)
+        #print("Model Metrics for Age Group = {0}, Case={1}: ".format(age, col))
+        #print(results)
         df_model_metrics=df_model_metrics.append(results)
-        
-        
+
+print(df_model_metrics)
+df_model_metrics.to_csv("cm_model_validation_metrics.csv")      
+print("Model Metrics by Age Group is saved in cm_model_validation_metrics.csv")
