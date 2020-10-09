@@ -79,7 +79,9 @@ for age in age_categories:
         results['case'] = col
         #print("Model Metrics for Age Group = {0}, Case={1}: ".format(age, col))
         #print(results)
-        df_model_metrics=df_model_metrics.append(results)
+        df_model_metrics=df_model_metrics.append(results, ignore_index=True)
+
+df_model_metrics.reset_index(drop=True, inplace=True)
 
 print(df_model_metrics)
 df_model_metrics.to_csv("cm_model_validation_metrics.csv")      
