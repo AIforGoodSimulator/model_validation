@@ -25,14 +25,14 @@ def mean_absolute_percentage_error(y_true, y_pred):
 
 # Forecasting Model Metrics
 def model_metrics(y,pred):
-    metrics = pd.DataFrame({'r2_score':r2_score(y, pred),
-                           }, index=[0])
-    metrics['mean_absolute_error'] = mean_absolute_error(y, pred)
-    metrics['median_absolute_error'] = median_absolute_error(y, pred)
-    metrics['mse'] = mean_squared_error(y, pred)
-    metrics['msle'] = mean_squared_log_error(y, pred)
-    metrics['mape'] = mean_absolute_percentage_error(y, pred)
-    metrics['rmse'] = np.sqrt(metrics['mse'])
+    metrics= pd.DataFrame(columns=['MAPE','RMSE','MSE', 'MeanAE', 'MedianAE','R2_Score', 'MSLE' ], index=[0])
+    metrics['R2_Score'] = r2_score(y, pred)                          
+    metrics['MAPE'] = mean_absolute_percentage_error(y, pred)
+    metrics['MeanAE'] = mean_absolute_error(y, pred)
+    metrics['MedianAE'] = median_absolute_error(y, pred)
+    metrics['MSE'] = mean_squared_error(y, pred)
+    metrics['RMSE'] = np.sqrt(metrics['MSE'])
+    metrics['MSLE'] = mean_squared_log_error(y, pred)
     return metrics
 
 
