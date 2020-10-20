@@ -132,7 +132,7 @@ for col in case_cols:
         # plotting the partial auto correlation
         figs[n_figures*i + 4].suptitle('PACF of ' + col + ' over different age groups')
         ax5 = figs[n_figures*i + 4].add_subplot(Rows, Cols, n1)
-        plot_pacf(pred, ax5, lags=50, title='Partial Autocorrelation'+'Age : ' + age)
+        plot_pacf(pred, ax5, lags=50, method='ywm', title='Partial Autocorrelation'+'Age : ' + age)
 
         print("col " + col + ' age ' + age)
         n1 = n1 + 1
