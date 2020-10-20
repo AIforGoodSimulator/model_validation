@@ -97,14 +97,14 @@ for col in case_cols:
         # plotting the auto correlation
         fig[n_figures*i + 3].suptitle('ACF of ' + col + ' over different age groups')
         ax4 = fig[n_figures*i + 3].add_subplot(Rows, Cols, n1)
-        plot_acf(pred, ax4, lags=30, title='Autocorrelation '+'Age : ' + age)
+        plot_acf(y-pred, ax4, lags=30, title='Autocorrelation '+'Age : ' + age)
 
         # plotting the partial auto correlation
         fig[n_figures*i + 4].suptitle('PACF of ' + col + ' over different age groups')
         ax5 = fig[n_figures*i + 4].add_subplot(Rows, Cols, n1)
-        plot_pacf(pred, ax5, lags=50, method='ywm', title='Partial Autocorrelation'+'Age : ' + age)
+        plot_pacf(y-pred, ax5, lags=50, method='ywm', title='Partial Autocorrelation'+'Age : ' + age)
 
-        print("col " + col + 'age ' + age)
+        print("col " + col + ' age ' + age)
         n1 = n1 + 1
     i = i + 1
 plt.tight_layout()
