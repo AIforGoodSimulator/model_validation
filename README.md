@@ -51,7 +51,7 @@ We also have developed the following use cases for Model validation:
 
 Here is an sample for CM model : model_validation/validate_cm_output.py
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4055612f-d210-41b4-ad7c-8ef08ede897d/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4055612f-d210-41b4-ad7c-8ef08ede897d/Untitled.png)
+!https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4055612f-d210-41b4-ad7c-8ef08ede897d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20201021%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201021T170417Z&X-Amz-Expires=86400&X-Amz-Signature=a44b0f5589813fa9d54b2935aab8e61dd78d6f474f47064022dddb9480714b7f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22]
 
 The full CSV sample output could be found in this file in GitHub
 [https://github.com/AIforGoodSimulator/model_validation/blob/master/cm_model_validation_metrics.csv](https://github.com/AIforGoodSimulator/model_validation/blob/master/cm_model_validation_metrics.csv)
@@ -62,7 +62,7 @@ Here is an sample for CM model : model_validation/compare_cm_output.py
 
 The sample model validation output for comparing two different runs:
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/156595cf-206f-4562-84c3-54c119f13825/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/156595cf-206f-4562-84c3-54c119f13825/Untitled.png)
+![https://s3.us-west-2.amazonaws.com/secure.notion-static.com/156595cf-206f-4562-84c3-54c119f13825/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20201021%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201021T170137Z&X-Amz-Expires=86400&X-Amz-Signature=b7e2fbbc38553ae0f83e1a72e89a36a7ebb59b0b32cc2de55e3a1d15b3bde65f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22]I 
 
 
 ### References for Model Validation
