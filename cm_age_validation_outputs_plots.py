@@ -55,7 +55,7 @@ for col in case_cols:
     # different types of figures eg:series, histogram, distribution, auto-correlation, partial auto-correlation
     n_figures = 5
     for f in range(n_figures):
-        fig.append(plt.figure((n_figures*i)+f, figsize=(10, 3)))
+        fig.append(plt.figure((n_figures*i)+f, figsize=(21, 9)))
     for age in age_categories:
         cols = [col + ": " + age, "Time"]
         df_age_simul = df_cm[cols]
@@ -95,17 +95,23 @@ for col in case_cols:
         ax3.legend()
 
         # plotting the auto correlation
-        fig[n_figures*i + 3].suptitle('ACF of ' + col + ' over different age groups')
-        ax4 = fig[n_figures*i + 3].add_subplot(Rows, Cols, n1)
-        plot_acf(y-pred, ax4, lags=30, title='Autocorrelation '+'Age : ' + age)
+        fig[n_figures * i + 3].suptitle('Auto Correlation of ' + col + ' over different age groups')
+        ax4 = fig[n_figures * i + 3].add_subplot(Rows, Cols, n1)
+        plot_acf(y - pred, ax4, lags=30, title='Age : ' + age)
 
         # plotting the partial auto correlation
-        fig[n_figures*i + 4].suptitle('PACF of ' + col + ' over different age groups')
-        ax5 = fig[n_figures*i + 4].add_subplot(Rows, Cols, n1)
-        plot_pacf(y-pred, ax5, lags=50, method='ywm', title='Partial Autocorrelation'+'Age : ' + age)
+        fig[n_figures * i + 4].suptitle('Partial Auto Correlation of ' + col + ' over different age groups')
+        ax5 = fig[n_figures * i + 4].add_subplot(Rows, Cols, n1)
+        plot_pacf(y - pred, ax5, lags=50, method='ywm', title='Age : ' + age)
 
         print("col " + col + ' age ' + age)
+
+        # uncomment below lines and create cm_figures folder to save the figures
+        # figures = ['Series', 'Histogram', 'Distribution', 'ACF', 'PACF']
+        # for f in range(n_figures):
+        #     fig[(n_figures*i)+f].savefig('cm_figures/' + col + '_' + figures[f] + '.png', dpi=200, format='png')
+
         n1 = n1 + 1
     i = i + 1
-plt.tight_layout()
+# plt.subplots_adjust(wspace=1.0, hspace=1.0)
 plt.show()

@@ -33,7 +33,7 @@ print("num of days = ", baseline_n_days)
 print("num of simulations= ", baseline_n_simul)
 
 # Get df for population
-# Use this as the benchmark for the age group
+# Use this as the baseline
 cols_overall = ["Time"] + case_cols
 df_baseline_all_simul = df_baseline[cols_overall]
 df_baseline_all_sum = df_baseline_all_simul.groupby(['Time']).sum() * population
@@ -54,7 +54,7 @@ print("num of days = ", n_days)
 print("num of simulations= ", n_simul)
 
 # Get df for population
-# Use this as the benchmark for the age group
+# Use this as the one to be validated
 cols_overall = ["Time"] + case_cols
 df_model_all_simul = df_model[cols_overall]
 df_model_all_sum = df_model_all_simul.groupby(['Time']).sum() * population
@@ -79,7 +79,7 @@ for col in case_cols:
     # different types of figures eg:series, histogram, distribution, auto-correlation, partial auto-correlation
     n_figures = 5
     for f in range(n_figures):
-        figs.append(plt.figure((n_figures*i)+f, figsize=(10, 3)))
+        figs.append(plt.figure((n_figures*i)+f, figsize=(21, 9)))
     for age in age_categories:
         cols = [col + ": " + age, "Time"]
         # baseline
@@ -125,18 +125,23 @@ for col in case_cols:
         ax3.legend()
 
         # plotting the auto correlation
-        figs[n_figures*i + 3].suptitle('ACF of ' + col + ' over different age groups')
+        figs[n_figures*i + 3].suptitle('Auto Correlation of ' + col + ' over different age groups')
         ax4 = figs[n_figures*i + 3].add_subplot(Rows, Cols, n1)
-        plot_acf(y-pred, ax4, lags=30, title='Autocorrelation '+'Age : ' + age)
+        plot_acf(y-pred, ax4, lags=30, title='Age : ' + age)
 
         # plotting the partial auto correlation
-        figs[n_figures*i + 4].suptitle('PACF of ' + col + ' over different age groups')
+        figs[n_figures*i + 4].suptitle('Partial Auto Correlation of ' + col + ' over different age groups')
         ax5 = figs[n_figures*i + 4].add_subplot(Rows, Cols, n1)
-        plot_pacf(y-pred, ax5, lags=50, method='ywm', title='Partial Autocorrelation'+'Age : ' + age)
+        plot_pacf(y-pred, ax5, lags=50, method='ywm', title='Age : ' + age)
 
         print("col " + col + ' age ' + age)
+
+        figures = ['Series', 'Histogram', 'Distribution', 'ACF', 'PACF']
+        for f in range(n_figures):
+            figs[(n_figures*i)+f].savefig('cm_validation_figures/' + col + '_' + figures[f] + '.png', dpi=200, format='png')
+
         n1 = n1 + 1
 
     i = i + 1
-plt.tight_layout()
+# plt.subplots_adjust(wspace=1.0, hspace=1.0)
 plt.show()
