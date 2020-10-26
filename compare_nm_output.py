@@ -1,6 +1,6 @@
 # AI for Good COVID-19 Simulator
 ## Module: Model Validation
-## Last updated: 10/5/2020
+## Last updated: 10/23/2020
 
 import pandas as pd
 import numpy as np
