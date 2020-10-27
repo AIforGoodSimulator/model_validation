@@ -1,12 +1,14 @@
 import numpy as np
 import pandas as pd
+from datetime import date, timedelta
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.express as px
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-
+import dash_bootstrap_components as dbc
 
 pd.set_option("display.max_rows", None, "display.max_columns", None)
 
@@ -242,14 +244,65 @@ def plot_distribution(x, df_baseline_age, df_model_age, category, age_categories
     )
     return fig
 
+def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, shifts=31):
+
+    def get_autocorrelation(sequence, shifts=31):
+        correlations = []
+        
+        for shift in range(1, shifts):
+            correlation = np.corrcoef(sequence[:-shift], sequence[shift:])[0, 1]
+            correlations.append(correlation)
+        return [1] + correlations  # correlation with 0 shift -> 1
+
+    def get_partial_autocorrelation(sequence, shifts=31):
+        p_correlations = []
+
+        residuals = sequence
+        for shift in range(1, shifts):
+            correlation = np.corrcoef(sequence[:-shift], residuals[shift:])[0, 1]
+            p_correlations.append(correlation)
+
+            m, c =  np.polyfit(sequence[:-shift], residuals[shift:], 1)  # m -> grad.; c -> intercept
+            residuals[shift:] = residuals[shift:] - (m * sequence[:-shift] + c)
+        return [1] + p_correlations
+
+    autocorrelations, p_autocorrelations = [], []
+    for age in age_categories:
+        col_age = col + ": " + age
+        y = df_baseline_age[col_age]
+        pred = df_model_age[col_age]
+        input = y - pred
+
+        autocorrelations.append([np.linspace(0, shifts-1, shifts), get_autocorrelation(pred.to_numpy().copy(), shifts=shifts), [age for __ in range(shifts)]])
+        p_autocorrelations.append([np.linspace(0, shifts-1, shifts), get_partial_autocorrelation(pred.to_numpy(), shifts=shifts), [age for __ in range(shifts)]])
+
+    autocorrelations, p_autocorrelations = np.asarray(autocorrelations), np.asarray(p_autocorrelations)
+
+    ac_df = pd.DataFrame(data={"shift": autocorrelations[:,0].flatten(), "ac": autocorrelations[:,1].flatten(), "colour": autocorrelations[:,2].flatten()})
+    pac_df = pd.DataFrame(data={"shift": p_autocorrelations[:,0].flatten(), "pac": p_autocorrelations[:,1].flatten(), "colour": p_autocorrelations[:,2].flatten()})
+
+    print(ac_df.head)
+
+    ac_fig = px.line(ac_df, x="shift", y="ac", color="colour", title="autocorrelation")
+    pac_fig = px.line(pac_df, x="shift", y="pac", color="colour", title="partial autocorrelation")
+
+    return ac_fig, pac_fig
+
+
 case_cols = pd.read_csv("cm_output_columns.csv")['columns'].to_list()
+
 x = [i+1 for i in range(n_days)]
+
+
 
 graph_divs = []
 for col in case_cols:
-    graph_divs.append(html.Div(dcc.Graph(figure = plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-    graph_divs.append(html.Div(dcc.Graph(figure = plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-    graph_divs.append(html.Div(dcc.Graph(figure = plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+    ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories)
+    graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
+    graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))
+    graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+    graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+    graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
 app = dash.Dash()
 app.layout = html.Div(graph_divs)
 app.run_server(debug=True)
