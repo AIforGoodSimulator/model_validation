@@ -293,8 +293,6 @@ case_cols = pd.read_csv("cm_output_columns.csv")['columns'].to_list()
 
 x = [i+1 for i in range(n_days)]
 
-
-
 graph_divs = []
 for col in case_cols:
     ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories)
