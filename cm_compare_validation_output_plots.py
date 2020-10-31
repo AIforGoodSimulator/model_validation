@@ -87,7 +87,6 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     for i in range (0,len(traces_to_show_all_false)):
         traces_to_show_all_true.append(not traces_to_show_all_false[i])
 
-    #pp.pprint (traces_to_show_all_true)
     buttons_list.append(
         dict(label = "All",
         method = "update",
@@ -99,16 +98,12 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     for i in range(len(age_categories)):
         traces_to_show_all_false_copy =traces_to_show_all_false
         traces_to_show = gen_traces_to_show(traces_to_show_all_false_copy, i)
-        pp.pprint(traces_to_show_all_false)
-        print("")
         buttons_list.append(
             dict(label = age_categories[i],
             method = "update",
             args = [{"visible": traces_to_show},
                 {"showlegend": True}])
         )
-    #pp.pprint(buttons_list)
-    #print("")
     return buttons_list
 
 # Plots series graph with drop down menu of each age category
@@ -280,8 +275,6 @@ def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, shi
 
     ac_df = pd.DataFrame(data={"shift": autocorrelations[:,0].flatten(), "ac": autocorrelations[:,1].flatten(), "colour": autocorrelations[:,2].flatten()})
     pac_df = pd.DataFrame(data={"shift": p_autocorrelations[:,0].flatten(), "pac": p_autocorrelations[:,1].flatten(), "colour": p_autocorrelations[:,2].flatten()})
-
-    print(ac_df.head)
 
     ac_fig = px.line(ac_df, x="shift", y="ac", color="colour", title="autocorrelation")
     pac_fig = px.line(pac_df, x="shift", y="pac", color="colour", title="partial autocorrelation")
