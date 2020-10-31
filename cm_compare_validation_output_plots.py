@@ -10,6 +10,16 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
+
+# x is a list of days in data set starting at 1
+# y_baseline is a pandas dataframe of the model output for baseline
+# y_pred     is a pandas dataframe of the model output for baseline
+
+# Need to produce a figure for each of the model outputs for each of the age categories. 
+# Tempted to make age category a drop down selection.
+# Drop down selection was attempted but had issues and was impossible to fix within time costraints.
+# Attempt left in but function call commented out so that someone else could potentially take this up.
+
 pd.set_option("display.max_rows", None, "display.max_columns", None)
 
 # population of the camp
@@ -47,14 +57,6 @@ n_rows = df.shape[0]
 # num of simuls
 n_simul = df[df == 0].count()
 
-# x is a list of days in data set starting at 1
-# y_baseline is a pandas dataframe of the model output for baseline
-# y_pred     is a pandas dataframe of the model output for baseline
-
-# Need to produce a figure for each of the model outputs for each of the age categories. 
-# Tempted to make age category a drop down selection.
-
-
 # Generates the y data for the graph using the collumn name and df
 def generate_y_data(model_output_df, col_age): 
     y_data = model_output_df[col_age]
@@ -87,7 +89,6 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     for i in range (0,len(traces_to_show_all_false)):
         traces_to_show_all_true.append(not traces_to_show_all_false[i])
 
-    #pp.pprint (traces_to_show_all_true)
     buttons_list.append(
         dict(label = "All",
         method = "update",
@@ -99,16 +100,12 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     for i in range(len(age_categories)):
         traces_to_show_all_false_copy =traces_to_show_all_false
         traces_to_show = gen_traces_to_show(traces_to_show_all_false_copy, i)
-        pp.pprint(traces_to_show_all_false)
-        print("")
         buttons_list.append(
             dict(label = age_categories[i],
             method = "update",
             args = [{"visible": traces_to_show},
                 {"showlegend": True}])
         )
-    #pp.pprint(buttons_list)
-    #print("")
     return buttons_list
 
 # Plots series graph with drop down menu of each age category
@@ -244,7 +241,7 @@ def plot_distribution(x, df_baseline_age, df_model_age, category, age_categories
     )
     return fig
 
-def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, shifts=31):
+def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, category, shifts=31):
 
     def get_autocorrelation(sequence, shifts=31):
         correlations = []
@@ -281,10 +278,8 @@ def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, shi
     ac_df = pd.DataFrame(data={"shift": autocorrelations[:,0].flatten(), "ac": autocorrelations[:,1].flatten(), "colour": autocorrelations[:,2].flatten()})
     pac_df = pd.DataFrame(data={"shift": p_autocorrelations[:,0].flatten(), "pac": p_autocorrelations[:,1].flatten(), "colour": p_autocorrelations[:,2].flatten()})
 
-    print(ac_df.head)
-
-    ac_fig = px.line(ac_df, x="shift", y="ac", color="colour", title="autocorrelation")
-    pac_fig = px.line(pac_df, x="shift", y="pac", color="colour", title="partial autocorrelation")
+    ac_fig = px.line(ac_df, x="shift", y="ac", color="colour", title=f"Autocorrelation of {category} over different age groups")
+    pac_fig = px.line(pac_df, x="shift", y="pac", color="colour", title=f"Partial Autocorrelation of {category} over different age groups")
 
     return ac_fig, pac_fig
 
@@ -295,12 +290,12 @@ x = [i+1 for i in range(n_days)]
 
 graph_divs = []
 for col in case_cols:
-    ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories)
-    graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
-    graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))
     graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
     graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
     graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+    ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories, col)
+    graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
+    graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))
 app = dash.Dash()
 app.layout = html.Div(graph_divs)
 app.run_server(debug=True)
