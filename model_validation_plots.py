@@ -108,7 +108,7 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     return buttons_list
 
 # Plots series graph with drop down menu of each age category
-def plot_series(x, df_baseline_age, df_model_age, category, age_categories, baseline_n_simul, n_simul):
+def plot_series(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
     # plotting the series
     fig = go.Figure()
     traces_to_show = []
@@ -150,7 +150,7 @@ def plot_series(x, df_baseline_age, df_model_age, category, age_categories, base
 
     return fig
 
-def plot_histogram(x, df_baseline_age, df_model_age, category, age_categories, baseline_n_simul, n_simul):
+def plot_histogram(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
     fig = go.Figure()
 
     traces_to_show = []
@@ -198,7 +198,7 @@ def plot_histogram(x, df_baseline_age, df_model_age, category, age_categories, b
     return fig
 
 # Plots a graph of kde distribution
-def plot_distribution(x, df_baseline_age, df_model_age, category, age_categories, baseline_n_simul, n_simul):
+def plot_distribution(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
 
     
     traces_to_show = []
@@ -242,6 +242,7 @@ def plot_distribution(x, df_baseline_age, df_model_age, category, age_categories
 
 def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, category, shifts=31):
 
+
     def get_autocorrelation(sequence, shifts=31):
         correlations = []
         
@@ -283,20 +284,66 @@ def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, cat
     return ac_fig, pac_fig
 
 
-case_cols = pd.read_csv("cm_output_columns.csv")['columns'].to_list()
 
-x = [i+1 for i in range(n_days)]
+# Required the following arguments:
+#   - population: camp population in integer
+#   - model: model name such as CM, NM or ABM
+#   - baseline_output:  csv file name for baseline output
+#   - model_output: csv file name for model output
+#   - optional: save_outout: csv file name for saving model validation output
 
-graph_divs = []
-for col in case_cols:
-    graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-    graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-    graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-    ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories, col)
-    graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
-    graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))
+def model_validation_plots(population:int, model:str, baseline_output:str, model_output:str):
+
+    case_cols=[]
+    time_col="Time"
+    if model.upper() =="CM":
+        case_cols=pd.read_csv("cm_output_columns.csv")['columns'].to_list()
+    elif model.upper() == "ABM":
+        time_col="DAY"
+        case_cols = pd.read_csv("abm_output_columns.csv")['columns'].to_list()
+    elif model.upper() == "NM":
+        case_cols = pd.read_csv("nm_output_columns.csv")['columns'].to_list()
+
+    # read example csvs
+    age_categories = pd.read_csv("age_categories.csv")['age'].to_list()
+    case_cols = pd.read_csv("cm_output_columns.csv")['columns'].to_list()
+
+    # Process baseline csv
+    df_baseline = pd.read_csv(baseline_output)
+    df = df_baseline[time_col]
+    baseline_n_days = df.nunique()  # Count distinct observations over requested axis.
+    baseline_n_rows = df.shape[0]
+    # num of simuls
+    baseline_n_simul = df[df == 0].count()
+
+    # Get df for population
+    # Use this as the benchmark for the age group
+    cols_overall = [time_col] + case_cols
+    df_baseline_all_simul = df_baseline[cols_overall]
+    df_baseline_all_sum = df_baseline_all_simul.groupby([time_col]).sum() * population
+    df_baseline_all = df_baseline_all_sum / baseline_n_simul
 
 
-app = dash.Dash()
-app.layout = html.Div(graph_divs)
-app.run_server(debug=True)
+    # Process Model Output and compare with baseline;
+    df_model = pd.read_csv(model_output)
+    df = df_model[time_col]
+    n_days = df.nunique()
+    n_rows = df.shape[0]
+    # num of simuls
+    n_simul = df[df == 0].count()
+
+
+
+    x = [i+1 for i in range(n_days)]
+
+    graph_divs = []
+    for col in case_cols:
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+        ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories, col)
+        graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
+        graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))
+
+
+    return (graph_divs)
