@@ -15,7 +15,6 @@ population = 18700
 baseline_output="ABM_output_sample1.csv"
 model_output="ABM_output_sample2.csv"
 
-
 age_categories=pd.read_csv("age_categories.csv")['age'].to_list()
 case_cols=pd.read_csv("abm_output_columns.csv")['columns'].to_list()
 
