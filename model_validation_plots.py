@@ -19,42 +19,8 @@ import dash_bootstrap_components as dbc
 # Drop down selection was attempted but had issues and was impossible to fix within time costraints.
 # Attempt left in but function call commented out so that someone else could potentially take this up.
 
-pd.set_option("display.max_rows", None, "display.max_columns", None)
+#pd.set_option("display.max_rows", None, "display.max_columns", None)
 
-# population of the camp
-population = 18700
-
-baseline_output = "CM_output_sample1.csv"
-model_output = "CM_output_sample2.csv"
-
-# read example csvs
-age_categories = pd.read_csv("age_categories.csv")['age'].to_list()
-case_cols = pd.read_csv("cm_output_columns.csv")['columns'].to_list()
-
-# Process baseline csv
-df_baseline = pd.read_csv(baseline_output)
-df = df_baseline["Time"]
-baseline_n_days = df.nunique() # Count distinct observations over requested axis.
-baseline_n_rows = df.shape[0]
-# num of simuls
-baseline_n_simul = df[df == 0].count()
-
-# Get df for population
-# Use this as the benchmark for the age group
-cols_overall = ["Time"] + case_cols
-df_baseline_all_simul = df_baseline[cols_overall]
-df_baseline_all_sum = df_baseline_all_simul.groupby(['Time']).sum() * population
-df_baseline_all = df_baseline_all_sum / baseline_n_simul
-df_baseline_all_mean = df_baseline_all.mean()
-df_baseline_all_std = df_baseline_all.std()
-
-# Process Model Output and compare with baseline;
-df_model = pd.read_csv(model_output)
-df = df_model["Time"]
-n_days = df.nunique()
-n_rows = df.shape[0]
-# num of simuls
-n_simul = df[df == 0].count()
 
 # Generates the y data for the graph using the collumn name and df
 def generate_y_data(model_output_df, col_age): 
@@ -66,7 +32,7 @@ def generate_col_age(col, age):
     col_age = f"{col}: {age}"
     return col_age
 
-def generate_model_age_df(category, age, df_model, n_simul):
+def generate_model_age_df(category, age, df_model, n_simul,population):
     cols = [category + ": " + age, "Time"]
     df_model_age_simul = df_model[cols]
     # Calculate averages for all simulations
@@ -108,14 +74,14 @@ def generate_drop_down_list(traces_to_show_all_false, age_categories):
     return buttons_list
 
 # Plots series graph with drop down menu of each age category
-def plot_series(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
+def plot_series(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul,population):
     # plotting the series
     fig = go.Figure()
     traces_to_show = []
     for age in age_categories:
 
-        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul)
-        df_model_age    = generate_model_age_df(category, age, df_model, n_simul)
+        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul,population)
+        df_model_age    = generate_model_age_df(category, age, df_model, n_simul,population)
 
         col_age = generate_col_age(category, age) # generated once for each age group for efficiency
 
@@ -150,15 +116,15 @@ def plot_series(x, df_baseline, df_model, category, age_categories, baseline_n_s
 
     return fig
 
-def plot_histogram(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
+def plot_histogram(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul,population):
     fig = go.Figure()
 
     traces_to_show = []
     for age in age_categories:
         col_age = generate_col_age(category, age)
 
-        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul)
-        df_model_age    = generate_model_age_df(category, age, df_model, n_simul)
+        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul,population)
+        df_model_age    = generate_model_age_df(category, age, df_model, n_simul,population)
 
         # Add histogram for baseline
         fig.add_histogram(x=x, y=generate_y_data(df_baseline_age, col_age),
@@ -198,7 +164,7 @@ def plot_histogram(x, df_baseline, df_model, category, age_categories, baseline_
     return fig
 
 # Plots a graph of kde distribution
-def plot_distribution(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul):
+def plot_distribution(x, df_baseline, df_model, category, age_categories, baseline_n_simul, n_simul,population):
 
     
     traces_to_show = []
@@ -206,8 +172,8 @@ def plot_distribution(x, df_baseline, df_model, category, age_categories, baseli
     group_labels = []
     for age in age_categories:
 
-        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul)
-        df_model_age    = generate_model_age_df(category, age, df_model, n_simul)
+        df_baseline_age = generate_model_age_df(category, age, df_baseline, baseline_n_simul,population)
+        df_model_age    = generate_model_age_df(category, age, df_model, n_simul,population)
 
         col_age = generate_col_age(category, age) # generated once for each age group for efficiency
 
@@ -284,13 +250,11 @@ def plot_autocorrelation(df_baseline_age, df_model_age, col, age_categories, cat
     return ac_fig, pac_fig
 
 
-
 # Required the following arguments:
 #   - population: camp population in integer
 #   - model: model name such as CM, NM or ABM
 #   - baseline_output:  csv file name for baseline output
 #   - model_output: csv file name for model output
-#   - optional: save_outout: csv file name for saving model validation output
 
 def model_validation_plots(population:int, model:str, baseline_output:str, model_output:str):
 
@@ -338,9 +302,9 @@ def model_validation_plots(population:int, model:str, baseline_output:str, model
 
     graph_divs = []
     for col in case_cols:
-        graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-        graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
-        graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul))))
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_series(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul,population))))
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_histogram(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul,population))))
+        graph_divs.append(html.Div(dcc.Graph(figure=plot_distribution(x, df_baseline, df_model, col, age_categories, baseline_n_simul, n_simul,population))))
         ac_fig, pac_fig = plot_autocorrelation(df_baseline, df_model, col, age_categories, col)
         graph_divs.append(html.Div(dcc.Graph(figure=ac_fig)))
         graph_divs.append(html.Div(dcc.Graph(figure=pac_fig)))

@@ -30,12 +30,15 @@ def model_validation_metrics(population:int, model:str, baseline_output:str, mod
     cols_results = ["age", "case"]
     df_model_metrics = pd.DataFrame(columns=cols_results)
 
+    # Read inputs
+    df_model = pd.read_csv(model_output)
+    df_baseline = pd.read_csv(baseline_output)
+
     if model.upper() =="CM":
         print("validating a compartment model ...")
         case_cols=pd.read_csv("cm_output_columns.csv")['columns'].to_list()
 
         # Process Baseline First;
-        df_baseline=pd.read_csv(baseline_output)
         df = df_baseline[time_col]
         baseline_n_days = df.nunique()
         baseline_n_rows = df.shape[0]
@@ -55,12 +58,8 @@ def model_validation_metrics(population:int, model:str, baseline_output:str, mod
         df_baseline_all_mean=df_baseline_all.mean()
         df_baseline_all_std=df_baseline_all.std()
     
-        cols_results = ["age", "case"]
-        df_model_metrics = pd.DataFrame(columns=cols_results)
-    
     
         # Process Model Output and compare with baseline;
-        df_model=pd.read_csv(model_output)
         df = df_model[time_col]
         n_days = df.nunique()
         n_rows = df.shape[0]
@@ -223,12 +222,13 @@ def model_validation_metrics(population:int, model:str, baseline_output:str, mod
                 y = y.dropna()
                 pred = pred.dropna()
                 ln = min(len(y), len(pred))
-                results = model_metrics(y.iloc[0:ln], pred.iloc[0:ln])
-                results['age'] = age
-                results['case'] = col
-                # print("Model Metrics for Age Group = {0}, Case={1}: ".format(age, col))
-                # print(results)
-                df_model_metrics = df_model_metrics.append(results, ignore_index=True)
+                if ln > 1:
+                    results = model_metrics(y.iloc[0:ln], pred.iloc[0:ln])
+                    results['age'] = age
+                    results['case'] = col
+                    # print("Model Metrics for Age Group = {0}, Case={1}: ".format(age, col))
+                    # print(results)
+                    df_model_metrics = df_model_metrics.append(results, ignore_index=True)
 
 
     elif model.upper() == "NM":
